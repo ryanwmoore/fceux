@@ -139,7 +139,12 @@ else:
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
     lua_available = False
     if env['SYSTEM_LUA']:
-      if conf.CheckLib('lua5.1'):
+      if conf.CheckLib('lua5.2'):
+        env.Append(LINKFLAGS = ["-ldl", "-llua5.2"])
+        env.Append(CCFLAGS = ["-I/usr/include/lua5.2"])
+        env.Append(CPPDEFINES = ["-DLUA_COMPAT_ALL"])
+        lua_available = True
+      elif conf.CheckLib('lua5.1'):
         env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
         env.Append(CCFLAGS = ["-I/usr/include/lua5.1"])
         lua_available = True
@@ -147,13 +152,15 @@ else:
         env.Append(LINKFLAGS = ["-ldl", "-llua"])
         env.Append(CCFLAGS = ["-I/usr/include/lua"])
         lua_available = True
-      if lua_available == False:
-        print 'Could not find liblua, exiting!'
-        Exit(1)
     else:
       env.Append(LINKFLAGS = ["-ldl"])
       env.Append(CCFLAGS = ["-Isrc/lua/src"])
       lua_available = True
+
+    if lua_available == False:
+      print 'Could not find liblua, exiting!'
+      Exit(1)
+
   # "--as-needed" no longer available on OSX (probably BSD as well? TODO: test)
   if env['PLATFORM'] != 'darwin':
     env.Append(LINKFLAGS=['-Wl,--as-needed'])

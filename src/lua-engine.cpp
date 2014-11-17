@@ -24,6 +24,8 @@
 #include "utils/xstring.h"
 #include "utils/memory.h"
 #include "fceulua.h"
+#include "lua-compatibility.h"
+
 
 #ifdef WIN32
 #include "drivers/win/common.h"

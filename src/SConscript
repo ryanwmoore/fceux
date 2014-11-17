@@ -1,6 +1,7 @@
 import glob
 file_list = glob.glob('*.cpp')
-file_list.remove('lua-engine.cpp') # use logic below for this
+file_list.remove('lua-engine.cpp')        # use logic below for this
+file_list.remove('lua-compatibility.cpp') # use logic below for this
 
 subdirs = Split("""
 boards
@@ -16,6 +17,7 @@ Export('env')
 
 if env['LUA']:
   file_list.append('lua-engine.cpp')
+  file_list.append('lua-compatibility.cpp')
   if env['SYSTEM_LUA'] == 0:
     subdirs.append('lua')
 
