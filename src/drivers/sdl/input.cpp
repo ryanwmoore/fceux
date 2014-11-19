@@ -28,6 +28,7 @@
 #include "sdl.h"
 
 #include "../common/cheat.h"
+#include "../../input.h"
 #include "../../movie.h"
 #include "../../fceu.h"
 #include "../../driver.h"
