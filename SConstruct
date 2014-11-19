@@ -44,7 +44,7 @@ if platform.system == "ppc":
   env['LSB_FIRST'] = 0
 
 # Default compiler flags:
-env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
+env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare', '-Isrc'])
 
 if os.environ.has_key('PLATFORM'):
   env.Replace(PLATFORM = os.environ['PLATFORM'])
@@ -91,8 +91,8 @@ else:
   if conf.CheckLib('dw'):
     conf.env.Append(CCFLAGS = "-DBACKWARD_HAS_DW=1")
     conf.env.Append(LINKFLAGS = "-ldw")
-  if conf.CheckFunc('asprintf'):
-    conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
+  if conf.CheckFunc('asprintf', '#define _GNU_SOURCE'):
+    conf.env.Append(CPPDEFINES = "-DHAVE_ASPRINTF")
   if env['SYSTEM_MINIZIP']:
     assert conf.CheckLibWithHeader('minizip', 'minizip/unzip.h', 'C', 'unzOpen;', 1), "please install: libminizip"
     assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
