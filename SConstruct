@@ -90,7 +90,7 @@ else:
   # If libdw is available, compile in backward-cpp support
   if conf.CheckLib('dw'):
     conf.env.Append(CCFLAGS = "-DBACKWARD_HAS_DW=1")
-    conf.env.Append(LINKFLAGS = "-ldw")
+    conf.env.Append(LIBS = "dw")
   if conf.CheckFunc('asprintf', '#define _GNU_SOURCE'):
     conf.env.Append(CPPDEFINES = "-DHAVE_ASPRINTF")
   if env['SYSTEM_MINIZIP']:
@@ -140,20 +140,20 @@ else:
     lua_available = False
     if env['SYSTEM_LUA']:
       if conf.CheckLib('lua5.2'):
-        env.Append(LINKFLAGS = ["-ldl", "-llua5.2"])
+        env.Append(LIBS = ["dl", "lua5.2"])
         env.Append(CCFLAGS = ["-I/usr/include/lua5.2"])
         env.Append(CPPDEFINES = ["-DLUA_COMPAT_ALL"])
         lua_available = True
       elif conf.CheckLib('lua5.1'):
-        env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
+        env.Append(LIBS = ["dl", "lua5.1"])
         env.Append(CCFLAGS = ["-I/usr/include/lua5.1"])
         lua_available = True
       elif conf.CheckLib('lua'):
-        env.Append(LINKFLAGS = ["-ldl", "-llua"])
+        env.Append(LIBS = ["dl", "lua"])
         env.Append(CCFLAGS = ["-I/usr/include/lua"])
         lua_available = True
     else:
-      env.Append(LINKFLAGS = ["-ldl"])
+      env.Append(LIBS = "dl")
       env.Append(CCFLAGS = ["-Isrc/lua/src"])
       lua_available = True
 
@@ -184,11 +184,19 @@ if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
 if env['FRAMESKIP']:
   env.Append(CPPDEFINES = ['FRAMESKIP'])
 
-print "base CPPDEFINES:",env['CPPDEFINES']
-print "base CCFLAGS:",env['CCFLAGS']
-
 if env['DEBUG']:
   env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g', '-O0'])
+
+if env['PLATFORM'] == 'posix' and env['RELEASE']:
+    #If doing a release build, be more strict about warnings. Code should
+    #meet the highest standards before release!
+    env.Append(CCFLAGS = ['-Werror'])
+    env.Append(CXXFLAGS = ['-Werror'])
+    #-Werror complains about locally defined but unused typedefs. So, enable
+    #c++0x which provides static_assert. Static_assert can statically assert
+    #statements without making locally defined but unused typedefs.
+    env.Append(CXXFLAGS = ['-std=c++0x'])
+    env.Append(CPPDEFINES = ['-DHAS_STATIC_ASSERT'])
 else:
   env.Append(CCFLAGS = ['-O2'])
 

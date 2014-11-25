@@ -86,10 +86,10 @@ static int prg_mask;
 //PRG wrapper
 static void BMCFK23CPW(uint32 A, uint8 V)
 {
-  uint32 bank = (EXPREGS[1] & 0x1F);
-  uint32 hiblock = ((EXPREGS[0] & 8) << 4)|((EXPREGS[0] & 0x80) << 1)|(UNIFchrrama?((EXPREGS[2] & 0x40)<<3):0);
-  uint32 block = (EXPREGS[1] & 0x60) | hiblock;
-  uint32 extra = (EXPREGS[3] & 2);
+  //uint32 bank = (EXPREGS[1] & 0x1F);
+  //uint32 hiblock = ((EXPREGS[0] & 8) << 4)|((EXPREGS[0] & 0x80) << 1)|(UNIFchrrama?((EXPREGS[2] & 0x40)<<3):0);
+  //uint32 block = (EXPREGS[1] & 0x60) | hiblock;
+  //uint32 extra = (EXPREGS[3] & 2);
 
   if((EXPREGS[0]&7)==4)
     setprg32(0x8000,EXPREGS[1]>>1);

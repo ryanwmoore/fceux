@@ -319,6 +319,11 @@ static uint8 ZNTable[256];
 #define LD_AB(op)  {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); op; break; }
 #define LD_ABI(reg,op)  {unsigned int A; uint8 x; GetABIRD(A,reg); x=RdMem(A); op; break;}
 #define LD_ABX(op)  LD_ABI(_X,op)
+
+#define LD_AB_NO_OP(op)  {unsigned int A; GetAB(A); break; }
+#define LD_ABI_NO_OP(reg)  {unsigned int A; GetABIRD(A,reg); break;}
+#define LD_ABX_NO_OP()  LD_ABI_NO_OP(_X)
+
 #define LD_ABY(op)  LD_ABI(_Y,op)
 #define LD_IX(op)  {unsigned int A; uint8 x; GetIX(A); x=RdMem(A); op; break;}
 #define LD_IY(op)  {unsigned int A; uint8 x; GetIYRD(A); x=RdMem(A); op; break;}

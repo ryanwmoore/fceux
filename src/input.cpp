@@ -405,6 +405,9 @@ static void SetInputStuff(int port)
 	case SI_NONE:
 		joyports[port].driver=&DummyJPort;
 		break;
+    default:
+        //TODO: WARNING
+        break;
 	}
 }
 
@@ -458,6 +461,9 @@ static void SetInputStuffFC()
 	case SIFC_TOPRIDER:
 		portFC.driver=FCEU_InitTopRider();
 		break;
+    default:
+        //TODO: WARNING
+        break;
 	}
 }
 
@@ -637,7 +643,6 @@ const char* FCEUI_CommandTypeNames[]=
 	"TAS Editor",
 };
 
-static void CommandUnImpl(void);
 static void CommandToggleDip(void);
 static void CommandStateLoad(void);
 static void CommandStateSave(void);
@@ -839,11 +844,6 @@ void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 	}
 }
 
-static void CommandUnImpl(void)
-{
-	FCEU_DispMessage("command '%s' unimplemented.",0, FCEUI_CommandTable[i].name);
-}
-
 static void CommandToggleDip(void)
 {
 	if (GameInfo->type==GIT_VSUNI)
@@ -929,6 +929,9 @@ static void CommandSoundAdjust(void)
 	case EMUCMD_SOUND_VOLUME_UP:		n=1;  break;
 	case EMUCMD_SOUND_VOLUME_DOWN:		n=-1;  break;
 	case EMUCMD_SOUND_VOLUME_NORMAL:	n=0;  break;
+    default:
+        //TODO: WARNING
+        break;
 	}
 
 	FCEUD_SoundVolumeAdjust(n);
@@ -1164,10 +1167,7 @@ static void MovieSubtitleToggle(void)
 
 static void UndoRedoSavestate(void)
 {
-	// FIXME this will always evaluate to true, should this be
-	// if (*lastSavestateMade...) to check if it holds a string or just
-	// a '\0'?
-	if (lastSavestateMade && (undoSS || redoSS))
+	if (*lastSavestateMade && (undoSS || redoSS))
 		SwapSaveState();
 }
 

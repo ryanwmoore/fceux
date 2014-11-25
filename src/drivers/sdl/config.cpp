@@ -9,6 +9,7 @@
 
 #include "sdl.h"
 #include "sdl-video.h"
+#include "sdl-hotkey-strings.h"
 #include "unix-netplay.h"
 
 #ifdef WIN32

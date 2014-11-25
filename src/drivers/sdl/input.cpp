@@ -26,6 +26,7 @@
 
 #include "sdl-video.h"
 #include "sdl.h"
+#include "sdl-hotkey-strings.h"
 
 #include "../common/cheat.h"
 #include "../../input.h"
@@ -986,7 +987,6 @@ int ButtonConfigBegin ()
 	// shut down the video and joystick subsystems
 	bcpv = KillVideo ();
 #endif
-	SDL_Surface *screen;
 
 	bcpj = KillJoysticks ();
 
@@ -1026,7 +1026,7 @@ int ButtonConfigBegin ()
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 			// TODO - SDL2
 #else
-			screen = SDL_SetVideoMode (420, 200, 8, 0);
+			SDL_SetVideoMode (420, 200, 8, 0);
 			SDL_WM_SetCaption ("Button Config", 0);
 #endif
 		}
@@ -1610,6 +1610,10 @@ const char * ButtonName (const ButtConfig * bc, int which)
 			return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
 #endif
 		case BUTTC_JOYSTICK:
+            break;
+#if 0
+            //This code is a mess/old. It doesn't set name and therefore has no
+            //visible effect.
 			int joyNum, inputNum;
 			const char *inputType, *inputDirection;
 
@@ -1650,6 +1654,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
 				inputNum = bc->ButtonNum[which];
 				inputDirection = "";
 			}
+#endif
 	}
 
 	return name;

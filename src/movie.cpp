@@ -692,6 +692,9 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 			state = VALUE;
 			if(isnewline) goto commit;
 			value += c;
+        default:
+            //TODO: WARNING
+            break;
 		}
 		goto done;
 
@@ -1411,18 +1414,22 @@ void FCEUMOV_IncrementRerecordCount()
 {
 #ifdef _S9XLUA_H
 	if(!FCEU_LuaRerecordCountSkip())
-		if (movieMode != MOVIEMODE_TASEDITOR)
+    {
+		if (movieMode != MOVIEMODE_TASEDITOR) {
 			currRerecordCount++;
-		else
+        } else {
 			currMovieData.rerecordCount++;
+        }
+    }
 #else
 	if (movieMode != MOVIEMODE_TASEDITOR)currRerecordCount++;
 		currRerecordCount++;
 	else
 		currMovieData.rerecordCount++;
 #endif
-	if (movieMode != MOVIEMODE_TASEDITOR)
+	if (movieMode != MOVIEMODE_TASEDITOR) {
 		currMovieData.rerecordCount = currRerecordCount;
+    }
 }
 
 void FCEUI_MovieToggleFrameDisplay(void)

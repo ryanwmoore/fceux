@@ -88,7 +88,7 @@ int str_ltrim(char *str, int flags) {
 int str_rtrim(char *str, int flags) {
 	unsigned int i=0, strl; //mbg merge 7/17/06 changed to unsigned int
 
-	while (strl = strlen(str)) {
+	while ((strl = strlen(str)) != 0) {
 		if ((flags & STRIP_SP) && (str[0] == ' ')) {
 			i++;
 			str[strl] = 0;
@@ -225,15 +225,19 @@ std::string BytesToString(const void* data, int len)
 		for(int n; len > 0; len -= n)
 		{
 			unsigned char input[3] = {0,0,0};
-			for(n=0; n<3 && n<len; ++n)
+			for(n=0; n<3 && n<len; ++n) {
 				input[n] = *src++;
+			}
 			unsigned char output[4] =
 			{
 				Base64Table[ input[0] >> 2 ],
 				Base64Table[ ((input[0] & 0x03) << 4) | (input[1] >> 4) ],
-				n<2 ? '=' : Base64Table[ ((input[1] & 0x0F) << 2) | (input[2] >> 6) ],
-				n<3 ? '=' : Base64Table[ input[2] & 0x3F ]
+				'=',
+				'='
 			};
+			if (n>=2) output[2] = Base64Table[((input[1] & 0x0F) << 2) | (input[2] >> 6)];
+			if (n>=3) output[3] = Base64Table[input[2] & 0x3F];
+
 			ret.append(output, output+4);
 		}
 	}
@@ -296,9 +300,9 @@ bool StringToBytes(const std::string& str, void* data, int len)
 			}
 			unsigned char outpacket[3] =
 			{
-				(converted[0] << 2) | (converted[1] >> 4),
-				(converted[1] << 4) | (converted[2] >> 2),
-				(converted[2] << 6) | (converted[3])
+				(unsigned char)((converted[0] << 2) | (converted[1] >> 4)),
+				(unsigned char)((converted[1] << 4) | (converted[2] >> 2)),
+				(unsigned char)((converted[2] << 6) | (converted[3]))
 			};
 			int outlen = (input[2] == '=') ? 1 : (input[3] == '=' ? 2 : 3);
 			if(outlen > len) outlen = len;
