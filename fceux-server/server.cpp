@@ -111,7 +111,7 @@ int LoadConfigFile(char *fn)
 {
  FILE *fp;
  ServerConfig.Port = ServerConfig.MaxClients = ServerConfig.ConnectTimeout = ServerConfig.FrameDivisor = ~0;
- if(fp=fopen(fn,"rb"))
+ if ((fp=fopen(fn,"rb")) != NULL)
  {
   char buf[256];
   while(fgets(buf, 256, fp) > 0)
@@ -127,7 +127,7 @@ int LoadConfigFile(char *fn)
    else if(!strncasecmp(buf,"password",strlen("password")))
    {
     char *pass = 0;
-    sscanf(buf,"%*s %as",&pass);
+    sscanf(buf,"%*s %ms",&pass);
     if(pass)
     {
      struct md5_context md5;
@@ -136,6 +136,7 @@ int LoadConfigFile(char *fn)
      md5_update(&md5,(uint8*)pass,strlen(pass));
      md5_finish(&md5,ServerConfig.Password);
      puts("Password required to log in.");
+     free(pass);
     }
    }
   }
@@ -240,7 +241,7 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
   throw(1);			/* Should not happen. */
  int l;
        
- while(l = recv(client->TCPSocket, client->nbtcp + client->nbtcphas, client->nbtcplen  - client->nbtcphas, MSG_NOSIGNAL))
+ while((l = recv(client->TCPSocket, client->nbtcp + client->nbtcphas, client->nbtcplen  - client->nbtcphas, MSG_NOSIGNAL)))
  {
   if(l == -1)
   {
@@ -392,7 +393,7 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
 			 if(!client->nickname)
 			  asprintf(&client->nickname,"*Player %s",mps);
 
-			 printf("Client %d assigned to game %d as player %s <%s>\n",client->id,(GameEntry*)client->game - Games,mps, client->nickname);
+			 printf("Client %d assigned to game %ld as player %s <%s>\n",client->id,(GameEntry*)client->game - Games,mps, client->nickname);
 
 			 int x;
 			 GameEntry *tg=(GameEntry *)client->game;
@@ -529,7 +530,6 @@ static void BroadcastText(GameEntry *game, const char *fmt, ...) throw(int)
 static void KillClient(ClientEntry *client)
 {
  GameEntry *game;
- uint8 *mps;
  char *bmsg;
 
  game = (GameEntry *)client->game;
@@ -547,13 +547,13 @@ static void KillClient(ClientEntry *client)
      game->Players[w] = NULL;
 
   time_t curtime = time(0);
-  printf("Player <%s> disconnected from game %d on %s",client->nickname,game-Games,ctime(&curtime)); 
+  printf("Player <%s> disconnected from game %ld on %s",client->nickname,game-Games,ctime(&curtime));
   asprintf(&bmsg, "* Player %s <%s> left.",MakeMPS(client),client->nickname);
   if(tc == client->localplayers)	/* If total players for this game = total local
 					   players for this client, destroy the game.
 					*/
   {
-   printf("Game %d destroyed.\n",game-Games);
+   printf("Game %ld destroyed.\n",game-Games);
    memset(game, 0, sizeof(GameEntry));
    game = 0;
   }
@@ -604,7 +604,7 @@ static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) 
  if(!game) /* Hmm, no game found.  Guess we'll have to create one. */
  {
   game=fegame;
-  printf("Game %d added\n",game-Games);
+  printf("Game %ld added\n",game-Games);
   memset(game, 0, sizeof(GameEntry));
   game->MaxPlayers = 4;
   memcpy(game->id, id, 16);
@@ -680,9 +680,8 @@ int main(int argc, char *argv[])
     ServerConfig.ConnectTimeout = DEFAULT_TIMEOUT;
     ServerConfig.FrameDivisor = DEFAULT_FRAMEDIVISOR;
   }
-  char* configfile = 0;
-   
-  
+
+
   for(i=1; i<argc ;i++)
   {
     if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h"))  {
@@ -838,7 +837,6 @@ int main(int argc, char *argv[])
    if(Clients[n].TCPSocket != -1) continue;
    if((Clients[n].TCPSocket = accept(ListenSocket, (struct sockaddr *)&sockin, &sockin_len)) != -1)
    {
-    struct sockaddr_in usockin;
     /* We have a new client.  Yippie. */
 
     fcntl(Clients[n].TCPSocket, F_SETFL, fcntl(Clients[n].TCPSocket, F_GETFL) | O_NONBLOCK);
@@ -885,7 +883,6 @@ int main(int argc, char *argv[])
     {
      ClientEntry *client = Games[whichgame].Players[n];
      if(!client || !Games[whichgame].IsUnique[n]) continue;
-     int localplayers = client->localplayers;
 
      while(CheckNBTCPReceive(client)) {};
     } // catch

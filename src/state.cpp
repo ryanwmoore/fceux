@@ -69,7 +69,7 @@ static int StateShow;
 //tells the save system innards that we're loading the old format
 bool FCEU_state_loading_old_format;
 
-char lastSavestateMade[2048]; //Stores the filename of the last savestate made (needed for UndoSavestate)
+char lastSavestateMade[2048] = {0}; //Stores the filename of the last savestate made (needed for UndoSavestate)
 bool undoSS = false;		  //This will be true if there is lastSavestateMade, it was made since ROM was loaded, a backup state for lastSavestateMade exists
 bool redoSS = false;		  //This will be true if UndoSaveState is run, will turn false when a new savestate is made
 
@@ -1048,7 +1048,7 @@ void SwapSaveState()
 	//Both files must exist
 	//--------------------------------------------------------------------------------------------
 
-	if (!lastSavestateMade)
+	if (!*lastSavestateMade)
 	{
 		FCEUI_DispMessage("Can't Undo",0);
 		FCEUI_printf("Undo savestate was attempted but unsuccessful because there was not a recently used savestate.\n");
@@ -1153,7 +1153,7 @@ void LoadBackup()
 void RedoLoadState()
 {
 	if (!redoLS) return;
-	if (lastLoadstateMade && redoLS)
+	if (*lastLoadstateMade && redoLS)
 	{
 		FCEUSS_Load(lastLoadstateMade);
 		FCEUI_printf("Redoing %s\n",lastLoadstateMade);

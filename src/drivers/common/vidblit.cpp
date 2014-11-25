@@ -74,20 +74,20 @@ static int Round(float value)
 
 static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 {
-	int a,x,z,y;
-	cshiftl[0]=cshiftl[1]=cshiftl[2]=-1;
-	for(a=0;a<3;a++)
-	{
-		for(x=0,y=-1,z=0;x<32;x++)
-		{
-			if(CBM[a]&(1<<x))
-			{
-				if(cshiftl[a]==-1) cshiftl[a]=x;
-				z++;
-			}
-		}
-		cshiftr[a]=(8-z);
-	}
+    int a,x,z;
+    cshiftl[0]=cshiftl[1]=cshiftl[2]=-1;
+    for(a=0;a<3;a++)
+    {
+        for(x=0,z=0;x<32;x++)
+        {
+            if(CBM[a]&(1<<x))
+            {
+                if(cshiftl[a]==-1) cshiftl[a]=x;
+                z++;
+            }
+        }
+        cshiftr[a]=(8-z);
+    }
 }
 
 

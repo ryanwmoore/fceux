@@ -194,7 +194,7 @@ static const char *guiCallbackTable = "FCEU.GUI";
 static int frameAdvanceWaiting = FALSE;
 
 // We save our pause status in the case of a natural death.
-static int wasPaused = FALSE;
+//static int wasPaused = FALSE;
 
 // Transparency strength. 255=opaque, 0=so transparent it's invisible
 static int transparencyModifier = 255;
@@ -240,11 +240,9 @@ static const char* luaCallIDStrings [] =
 	"CALL_AFTERLOAD",
 	"CALL_TASEDITOR_AUTO",
 	"CALL_TASEDITOR_MANUAL",
-
 };
 
-//make sure we have the right number of strings
-CTASSERT(sizeof(luaCallIDStrings)/sizeof(*luaCallIDStrings) == LUACALL_COUNT)
+CTASSERT(sizeof(luaCallIDStrings)/sizeof(*luaCallIDStrings) == LUACALL_COUNT, "wrong number of strings")
 
 static const char* luaMemHookTypeStrings [] =
 {
@@ -257,8 +255,7 @@ static const char* luaMemHookTypeStrings [] =
 	"MEMHOOK_EXEC_SUB",
 };
 
-//make sure we have the right number of strings
-CTASSERT(sizeof(luaMemHookTypeStrings)/sizeof(*luaMemHookTypeStrings) ==  LUAMEMHOOK_COUNT)
+CTASSERT(sizeof(luaMemHookTypeStrings)/sizeof(*luaMemHookTypeStrings) ==  LUAMEMHOOK_COUNT, "wrong number of strings")
 
 static char* rawToCString(lua_State* L, int idx=0);
 static const char* toCString(lua_State* L, int idx=0);
@@ -1335,8 +1332,6 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 	if(remaining <= 0)
 		return;
 
-	const char* str = ptr; // for debugging
-
 	// if there is a __tostring metamethod then call it
 	int usedMeta = luaL_callmeta(L, i, "__tostring");
 	if(usedMeta)
@@ -1360,7 +1355,7 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 		case LUA_TNIL: APPENDPRINT "nil" END break;
 		case LUA_TBOOLEAN: APPENDPRINT lua_toboolean(L,i) ? "true" : "false" END break;
 		case LUA_TSTRING: APPENDPRINT "%s",lua_tostring(L,i) END break;
-		case LUA_TNUMBER: APPENDPRINT "%.12Lg",lua_tonumber(L,i) END break;
+		case LUA_TNUMBER: APPENDPRINT "%.12Lg",(long double)lua_tonumber(L,i) END break;
 		case LUA_TFUNCTION:
 			/*if((L->base + i-1)->value.gc->cl.c.isC)
 			{
@@ -1437,21 +1432,26 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 					{
 						bool keyIsString = (lua_type(L, keyIndex) == LUA_TSTRING);
 						bool invalidLuaIdentifier = (!keyIsString || !isalphaorunderscore(*lua_tostring(L, keyIndex)));
-						if(invalidLuaIdentifier)
-							if(keyIsString)
-								APPENDPRINT "['" END
-							else
-								APPENDPRINT "[" END
-
+                        if(invalidLuaIdentifier) {
+                            if(keyIsString) {
+                                APPENDPRINT "['" END
+                            } else {
+                                APPENDPRINT "[" END
+                            }
+                        }
+							
 						toCStringConverter(L, keyIndex, ptr, remaining); // key
 
-						if(invalidLuaIdentifier)
-							if(keyIsString)
+						if(invalidLuaIdentifier) {
+							if(keyIsString) {
 								APPENDPRINT "']=" END
-							else
+                            } else {
 								APPENDPRINT "]=" END
-						else
+                            }
+                        }
+						else {
 							APPENDPRINT "=" END
+                        }
 					}
 
 					bool valueIsString = (lua_type(L, valueIndex) == LUA_TSTRING);
@@ -2096,6 +2096,8 @@ LuaMemHookType MatchHookTypeToCPU(lua_State* L, LuaMemHookType hookType)
 		case LUAMEMHOOK_WRITE: return LUAMEMHOOK_WRITE_SUB;
 		case LUAMEMHOOK_READ: return LUAMEMHOOK_READ_SUB;
 		case LUAMEMHOOK_EXEC: return LUAMEMHOOK_EXEC_SUB;
+        default: //TODO: WARNING
+          break;
 		}
 	}
 	return hookType;
@@ -2105,10 +2107,12 @@ static int memory_registerwrite(lua_State *L)
 {
 	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_WRITE), 1);
 }
+#if 0
 static int memory_registerread(lua_State *L)
 {
 	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_READ), 1);
 }
+#endif
 static int memory_registerexec(lua_State *L)
 {
 	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_EXEC), 1);
@@ -3289,7 +3293,6 @@ static inline uint32 gui_getcolour_wrapped(lua_State *L, int offset, bool hasDef
 			lua_pushnil(L); // first key
 			int keyIndex = lua_gettop(L);
 			int valueIndex = keyIndex + 1;
-			bool first = true;
 			while(lua_next(L, offset))
 			{
 				bool keyIsString = (lua_type(L, keyIndex) == LUA_TSTRING);
@@ -3490,31 +3493,6 @@ static int gui_box(lua_State *L) {
 	gui_drawbox_internal(x1, y1, x2, y2, outlinecolor);
 	if ((x2 - x1) >= 2 && (y2 - y1) >= 2)
 		gui_fillbox_internal(x1+1, y1+1, x2-1, y2-1, fillcolor);
-
-	return 0;
-}
-
-// (old) gui.box(x1, y1, x2, y2, color)
-static int gui_box_old(lua_State *L) {
-
-	int x1,y1,x2,y2;
-	uint32 colour;
-
-	x1 = luaL_checkinteger(L,1);
-	y1 = luaL_checkinteger(L,2);
-	x2 = luaL_checkinteger(L,3);
-	y2 = luaL_checkinteger(L,4);
-	colour = gui_getcolour(L,5);
-
-//	if (!gui_check_boundary(x1, y1))
-//		luaL_error(L,"bad coordinates");
-//
-//	if (!gui_check_boundary(x2, y2))
-//		luaL_error(L,"bad coordinates");
-
-	gui_prepare();
-
-	gui_drawbox_internal(x1, y1, x2, y2, colour);
 
 	return 0;
 }
@@ -3740,6 +3718,19 @@ static const uint32 Small_Font_Data[] =
 	0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 };
 
+/*
+static int strlinelen(const char* string)
+{
+	const char* s = string;
+	while(*s && *s != '\n')
+		s++;
+	if(*s)
+		s++;
+	return s - string;
+}
+*/
+
+#if 0
 static void PutTextInternal (const char *str, int len, short x, short y, int color, int backcolor)
 {
 	int Opac = (color >> 24) & 0xFF;
@@ -3821,16 +3812,6 @@ draw_outline:
 	}
 }
 
-static int strlinelen(const char* string)
-{
-	const char* s = string;
-	while(*s && *s != '\n')
-		s++;
-	if(*s)
-		s++;
-	return s - string;
-}
-
 static void LuaDisplayString (const char *string, int y, int x, uint32 color, uint32 outlineColor)
 {
 	if(!string)
@@ -3877,6 +3858,7 @@ static void LuaDisplayString (const char *string, int y, int x, uint32 color, ui
 	}
 */
 }
+#endif
 
 
 static uint8 FCEUFont[792] =
@@ -3998,7 +3980,7 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 		return;
 
 	size_t len = l;
-	int defaultAlpha = std::max(0, std::min(transparencyModifier, 255));
+	//int defaultAlpha = std::max(0, std::min(transparencyModifier, 255));
 	int diffx;
 	int diffy = std::max(0, std::min(7, LUA_SCREEN_HEIGHT - y));
 
@@ -4063,7 +4045,7 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 //  main HUD.
 static int gui_text(lua_State *L) {
 
-	extern int font_height;
+	//extern int font_height;
 	const char *msg;
 	int x, y;
 	size_t l;
@@ -4476,15 +4458,14 @@ static int taseditor_registermanual(lua_State *L)
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
 
-	const char* caption = NULL;
-	if (!lua_isnil(L, 2))
-		caption = lua_tostring(L, 2);
-
 	lua_settop(L,1);
 	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 	lua_insert(L,1);
 	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 #ifdef WIN32
+	const char* caption = NULL;
+	if (!lua_isnil(L, 2))
+		caption = lua_tostring(L, 2);
 	taseditor_lua.enableRunFunction(caption);
 #endif
 	return 1;
@@ -4786,10 +4767,9 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	assert(iicon >= 0 && iicon <= 3);
 	if(!(iicon >= 0 && iicon <= 3)) iicon = 0;
 
+#ifdef WIN32
 	static const char * const titles [] = {"Notice", "Question", "Warning", "Error"};
 	const char* answer = "ok";
-
-#ifdef WIN32
 	static const int etypes [] = {MB_OK, MB_YESNO, MB_YESNOCANCEL, MB_OKCANCEL, MB_ABORTRETRYIGNORE};
 	static const int eicons [] = {MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONWARNING, MB_ICONERROR};
 	//StopSound(); //mbg merge 7/27/08
@@ -5223,6 +5203,7 @@ static int bitbit(lua_State *L)
 	BRET(rv);
 }
 
+#if 0
 // The function called periodically to ensure Lua doesn't run amok.
 static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 
@@ -5266,6 +5247,7 @@ static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 
 
 }
+#endif
 
 static void emu_exec_count_hook(lua_State *L, lua_Debug *dbg) {
 	luaL_error(L, "exec_count timeout");
@@ -5776,8 +5758,10 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	// And run it right now. :)
 	//FCEU_LuaFrameBoundary();
 
+#if 0
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
-	//lua_sethook(thread, FCEU_LuaHookFunction, LUA_MASKCOUNT, 10000);
+	lua_sethook(thread, FCEU_LuaHookFunction, LUA_MASKCOUNT, 10000);
+#endif
 
 #ifdef WIN32
 	info_print = PrintToWindowConsole;

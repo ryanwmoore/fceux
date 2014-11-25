@@ -644,7 +644,7 @@ void Convert_4byte_To_YUY2Frame(const void* data, unsigned char* dest, unsigned 
     unsigned height = npixels / width;
     unsigned pos = 0;
     unsigned ypos = 0;
-    unsigned stride = width*PixStride;
+    //unsigned stride = width*PixStride;
 
     /* This function is based on code from x264 svn version 711 */
     /* TODO: Apply MMX optimization for 24-bit pixels */
@@ -795,12 +795,12 @@ void Convert_2byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
 template<int roffs,int rbits, int goffs,int gbits, int boffs,int bbits>
 void Convert_2byte_To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
 {
-    const unsigned PixStride = 2;
+    //const unsigned PixStride = 2;
     const unsigned char* src = (const unsigned char*) data;
     unsigned height = npixels / width;
     unsigned pos = 0;
     unsigned ypos = 0;
-    unsigned stride = width*PixStride;
+    //unsigned stride = width*PixStride;
 
     for(unsigned y=0; y<height; ++y)
     {
@@ -894,7 +894,9 @@ void Convert_I420To24Frame(const void* data, unsigned char* dest,
         
     */
     
+#ifdef RGB_TO_RGB_OMP
   #pragma omp parallel for
+#endif
     for(unsigned y=0; y<height; y += 2)
     {
         for(unsigned x=0; x<width; )
@@ -1046,7 +1048,9 @@ void Convert_YUY2To24Frame(const void* data, unsigned char* dest,
         V input: 16..240
         
     */
+#ifdef RGB_TO_RGB_OMP
   #pragma omp parallel for
+#endif
     for(unsigned y=0; y<height; ++y)
     {
         for(unsigned x=0; x<width; x += 2)

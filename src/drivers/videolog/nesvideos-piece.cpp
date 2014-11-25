@@ -590,7 +590,9 @@ public:
         else
 #endif
         {
+#ifdef HAVE_X264
         raw_fallback:
+#endif
             fwrite(data, 1, bytes, vidfp);
         }
 

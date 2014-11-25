@@ -8,6 +8,7 @@
 #include "../common/configSys.h"
 
 #include "sdl.h"
+#include "sdl-hotkey-strings.h"
 #include "gui.h"
 #include "dface.h"
 #include "input.h"
@@ -80,13 +81,12 @@ bool checkGTKVersion(int major_required, int minor_required)
 // This function configures a single hotkey
 int configHotkey(char* hotkeyString)
 {
-	SDL_Surface *screen;
 	SDL_Event event;
 	KillVideo();
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	return 0; // TODO - SDL 2.0
 #else
-	screen = SDL_SetVideoMode(420, 200, 8, 0);
+	SDL_SetVideoMode(420, 200, 8, 0);
 	//SDL_WM_SetCaption("Press a key to bind...", 0);
 
 	int newkey = 0;
@@ -502,7 +502,6 @@ void openHotkeyConfig()
 
 	std::string prefix = "SDL.Hotkeys.";
     GtkTreeIter iter; // parent
-    GtkTreeIter iter2; // child
     
     gtk_tree_store_append(hotkey_store, &iter, NULL); // aquire iter
      
@@ -634,7 +633,7 @@ void openGamepadConfig()
 	GtkWidget* vbox;
 	GtkWidget* hboxPadNo;
 	GtkWidget* padNoLabel;
-	GtkWidget* configNoLabel;
+	//GtkWidget* configNoLabel;
 	GtkWidget* fourScoreChk;
 	GtkWidget* oppositeDirChk;
 	GtkWidget* buttonFrame;
@@ -655,7 +654,8 @@ void openGamepadConfig()
 	
 	hboxPadNo = gtk_hbox_new(FALSE, 0);
 	padNoLabel = gtk_label_new("Port:");
-	configNoLabel = gtk_label_new("Config Number:");
+	//configNoLabel =
+	gtk_label_new("Config Number:");
 	fourScoreChk = gtk_check_button_new_with_label("Enable Four Score");
 	oppositeDirChk = gtk_check_button_new_with_label("Allow Up+Down / Left+Right");
 	
@@ -1094,7 +1094,7 @@ void openVideoConfig()
 }
 const char* mixerStrings[6] = {"Volume", "Triangle", "Square1", "Square2", "Noise", "PCM"};
 
-int mixerChanged(GtkWidget* w, gpointer p)
+int mixerChanged(GtkWidget* w, gpointer unused)
 {
 	int v = gtk_range_get_value(GTK_RANGE(w));
 	GtkWidget* parent = gtk_widget_get_parent(w);
@@ -1146,7 +1146,7 @@ void openSoundConfig()
 	GtkWidget* hbox2;
 	GtkWidget* rateCombo;
 	GtkWidget* rateLbl;
-	GtkWidget* hbox3;
+	//GtkWidget* hbox3;
 	GtkWidget* bufferLbl;
 	GtkWidget* bufferHscale;
 	GtkWidget* mixerFrame;
@@ -1239,7 +1239,8 @@ void openSoundConfig()
 	gtk_box_pack_start(GTK_BOX(hbox2), rateLbl, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(hbox2), rateCombo, FALSE, FALSE, 5);
 	
-	hbox3 = gtk_hbox_new(FALSE, 2);
+	//hbox3 =
+	gtk_hbox_new(FALSE, 2);
 	bufferHscale = gtk_hscale_new_with_range(15, 200, 2);
 	bufferLbl = gtk_label_new("Buffer size (in ms)");
 
@@ -1259,7 +1260,7 @@ void openSoundConfig()
 		mixerFrames[i] = gtk_frame_new(mixerStrings[i]);
 		gtk_container_add(GTK_CONTAINER(mixerFrames[i]), mixers[i]);
 		gtk_box_pack_start(GTK_BOX(mixerHbox), mixerFrames[i], FALSE, TRUE, 5);
-		g_signal_connect(mixers[i], "button-release-event", G_CALLBACK(mixerChanged), (gpointer)i); 
+		g_signal_connect(mixers[i], "button-release-event", G_CALLBACK(mixerChanged), NULL);
 	}
 	
 	// sync with cfg
@@ -1436,7 +1437,7 @@ void recordMovieAs ()
 		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		if (!fname.size())
 			return; // no filename selected, quit the whole thing
-	  char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
+		FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0);
 		
 		std::string s = GetUserText("Author name");
 		std::wstring author(s.begin(), s.end());
@@ -2452,11 +2453,13 @@ void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 		InitVideo(GameInfo);
 	}
 	gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
+#if 0
 	GdkColor black;
 	black.red = 0;
 	black.green = 0;
 	black.blue = 0;
-//	gtk_widget_modify_bg(GTK_WIDGET(win), GTK_STATE_NORMAL, &black);
+	gtk_widget_modify_bg(GTK_WIDGET(win), GTK_STATE_NORMAL, &black);
+#endif
 
 	printf("DEBUG: new xscale: %f yscale: %f\n", xscale, yscale);
 
