@@ -1609,7 +1609,8 @@ UpdateFTrainer ()
  */
 const char * ButtonName (const ButtConfig * bc, int which)
 {
-	static char name[256];
+    const int NAME_BUFFER_SIZE = 256;
+	static char name[NAME_BUFFER_SIZE];
 
 	switch (bc->ButtType[which])
 	{
@@ -1620,10 +1621,6 @@ const char * ButtonName (const ButtConfig * bc, int which)
 			return SDL_GetKeyName ((SDLKey) bc->ButtonNum[which]);
 #endif
 		case BUTTC_JOYSTICK:
-            break;
-#if 0
-            //This code is a mess/old. It doesn't set name and therefore has no
-            //visible effect.
 			int joyNum, inputNum;
 			const char *inputType, *inputDirection;
 
@@ -1664,7 +1661,7 @@ const char * ButtonName (const ButtConfig * bc, int which)
 				inputNum = bc->ButtonNum[which];
 				inputDirection = "";
 			}
-#endif
+            snprintf(name, NAME_BUFFER_SIZE, "Joystick%d %s %d %s", joyNum, inputType, inputNum, inputDirection);
 	}
 
 	return name;
