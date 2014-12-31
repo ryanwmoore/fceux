@@ -28,7 +28,8 @@ opts.AddVariables(
   BoolVariable('SYSTEM_MINIZIP', 'Use system minizip instead of static minizip provided with fceux', 0),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0),
-  BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 0)
+  BoolVariable('SDL2', 'Compile using SDL2 instead of SDL 1.2 (experimental/non-functional)', 0),
+  BoolVariable('EMSCRIPTEN', 'Use emscripten LLVM-to-JavaScript compiler', 0)
 )
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
@@ -56,10 +57,14 @@ if os.environ.has_key('WINDRES'):
   env.Replace(WINDRES = os.environ['WINDRES'])
 if os.environ.has_key('CFLAGS'):
   env.Append(CCFLAGS = os.environ['CFLAGS'].split())
+if os.environ.has_key('CPPPATH'):
+  env.Append(CPPPATH = os.environ['CPPPATH'].split())
 if os.environ.has_key('CXXFLAGS'):
   env.Append(CXXFLAGS = os.environ['CXXFLAGS'].split())
 if os.environ.has_key('CPPFLAGS'):
   env.Append(CPPFLAGS = os.environ['CPPFLAGS'].split())
+if os.environ.has_key('LIBPATH'):
+  env.Append(LIBPATH = os.environ['LIBPATH'].split())
 if os.environ.has_key('LDFLAGS'):
   env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
 if os.environ.has_key('PKG_CONFIG_PATH'):
@@ -68,6 +73,19 @@ if os.environ.has_key('PKG_CONFIG_LIBDIR'):
   env['ENV']['PKG_CONFIG_LIBDIR'] = os.environ['PKG_CONFIG_LIBDIR']
 
 print "platform: ", env['PLATFORM']
+
+if env['EMSCRIPTEN']:
+  if env['PLATFORM'] != 'posix':
+    print "EMSCRIPTEN with non-POSIX platform is not supported!"
+    Exit(1)
+  if env['SDL2']:
+    print "EMSCRIPTEN with SDL2 is not supported!"
+    Exit(1)
+  if env['OPENGL']:
+    #TODO: Is the GL emulation necessary?
+    env.Append(CCFLAGS = ["-s", "LEGACY_GL_EMULATION=1"])
+    env.Append(LINKFLAGS = ["-s", "LEGACY_GL_EMULATION=1"])
+  env.Append(CPPDEFINES = "-DSDL_GetKeyState=SDL_GetKeyboardState")
 
 # compile with clang
 if env['CLANG']:
@@ -88,10 +106,10 @@ if env['PLATFORM'] == 'win32':
 else:
   conf = Configure(env)
   # If libdw is available, compile in backward-cpp support
-  if conf.CheckLib('dw'):
+  if not env['EMSCRIPTEN'] and conf.CheckLib('dw'):
     conf.env.Append(CCFLAGS = "-DBACKWARD_HAS_DW=1")
     conf.env.Append(LIBS = "dw")
-  if conf.CheckFunc('asprintf', '#define _GNU_SOURCE'):
+  if env['EMSCRIPTEN'] or conf.CheckFunc('asprintf', '#define _GNU_SOURCE'):
     conf.env.Append(CPPDEFINES = "-DHAVE_ASPRINTF")
   if env['SYSTEM_MINIZIP']:
     assert conf.CheckLibWithHeader('minizip', 'minizip/unzip.h', 'C', 'unzOpen;', 1), "please install: libminizip"
@@ -109,7 +127,8 @@ else:
     if not conf.CheckLib('SDL'):
       print 'Did not find libSDL or SDL.lib, exiting!'
       Exit(1)
-    env.ParseConfig('sdl-config --cflags --libs')
+    if not env['EMSCRIPTEN']:
+      env.ParseConfig('sdl-config --cflags --libs')
   if env['GTK']:
     if not conf.CheckLib('gtk-x11-2.0'):
       print 'Could not find libgtk-2.0, exiting!'
@@ -139,19 +158,24 @@ else:
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
     lua_available = False
     if env['SYSTEM_LUA']:
-      if conf.CheckLib('lua5.2'):
-        env.Append(LIBS = ["dl", "lua5.2"])
-        env.Append(CCFLAGS = ["-I/usr/include/lua5.2"])
-        env.Append(CPPDEFINES = ["-DLUA_COMPAT_ALL"])
-        lua_available = True
-      elif conf.CheckLib('lua5.1'):
-        env.Append(LIBS = ["dl", "lua5.1"])
-        env.Append(CCFLAGS = ["-I/usr/include/lua5.1"])
-        lua_available = True
+      if not env['EMSCRIPTEN']:
+        if conf.CheckLib('lua5.2'):
+          env.Append(LIBS = ["dl", "lua5.2"])
+          env.Append(CCFLAGS = ["-I/usr/include/lua5.2"])
+          env.Append(CPPDEFINES = ["-DLUA_COMPAT_ALL"])
+          lua_available = True
+        elif conf.CheckLib('lua5.1'):
+          env.Append(LIBS = ["dl", "lua5.1"])
+          env.Append(CCFLAGS = ["-I/usr/include/lua5.1"])
+          lua_available = True
       elif conf.CheckLib('lua'):
-        env.Append(LIBS = ["dl", "lua"])
-        env.Append(CCFLAGS = ["-I/usr/include/lua"])
         lua_available = True
+        if env['EMSCRIPTEN']:
+          env.Append(LIBS = ["lua"])
+          env.Append(CPPDEFINES = ["-DLUA_COMPAT_ALL"])
+        else:
+          env.Append(LIBS = ["dl", "lua"])
+          env.Append(CCFLAGS = ["-I/usr/include/lua"])
     else:
       env.Append(LIBS = "dl")
       env.Append(CCFLAGS = ["-Isrc/lua/src"])

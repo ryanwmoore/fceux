@@ -1,0 +1,79 @@
+Compiling FCEUX With Emscripten
+===============================
+By Ryan Moore (github: ryanwmoore)
+
+Emscripten is a project that compiles C/C++ into JavaScript. With Emscripten,
+its possible to play FCEUX in your browser. Some browsers (e.g., Firefox)
+highly optimize Emscripten's output. For these browsers, performance can be
+approximately half the speed of a native compilation.
+
+Steps Overview
+--------------
+
+Building FCEUX under Emscripten requires a modern Linux installation. It might
+be possible to compile FCEUX using Windows, but this hasn't been investigated.
+Compile steps are given assuming you are using bash. The commands may change
+slightly if you use a different shell.
+
+To build FCEUX with Emscripten, a few steps must be done:
+
+1) Get Emscripten
+2) Compile zlib
+3) Compile lua
+4) Compile FCEUX
+
+Emscripten automatically provides some libraries (e.g., SDL) and doesn't work
+with existing, non-Emscripten libraries on your system. Because of this, it is
+normal to see some warnings when compiling. For example, when compiling Lua,
+you may see a warning like:
+
+    WARNING root: emcc: cannot find library "m"
+
+
+Get Emscripten
+--------------
+
+There are multiple ways to install Emscripten. It's probably safer just to grab
+the latest and greatest from the official site, instead of relying on
+potentially outdated packages.
+
+Therefore, follow the Emscripten getting started guide from
+http://kripken.github.io/emscripten-site/docs/getting_started/
+
+You will need the emsdk-portable.tar.gz installer. Run the update, install
+latest, and activate latest commands. Also be sure to setup your environment
+according to the guide.
+
+Compile zlib
+------------
+
+1) Download zlib's source from http://zlib.net/
+2) Extract the source and cd into the directory
+3) $ emmake make clean && emmake make
+
+This guide was written/tested using zlib 1.2.8.
+
+Compile lua
+-----------
+
+1) Download lua's source from http://www.lua.org
+2) Extract the source and cd into the directory
+3) $ emmake make clean generic install
+
+This guide was written/tested using lua 5.2.3.
+
+Compile FCEUX
+-------------
+
+1) cd into FCEUX's directory
+2) Prepare your environment to help FCEUX find your Emscripten-compiled zlib
+   and lua libraries:
+   $ export CPPPATH="path/to/zlib path/to/lua/install/include"
+   $ export LIBPATH="path/to/zlib path/to/lua/install/lib"
+2) $ EMCC_FAST_COMPILER=1 emconfigure scons RELEASE=1 GTK=0 LUA=1 SYSTEM_LUA=1 CREATE_AVI=0 OPENGL=0 EMSCRIPTEN=1
+
+
+Relevant links
+---------------
+http://kripken.github.io/emscripten-site/
+http://en.wikipedia.org/wiki/Emscripten
