@@ -393,7 +393,7 @@ static int CheckNBTCPReceive(ClientEntry *client) throw(int)
 			 if(!client->nickname)
 			  asprintf(&client->nickname,"*Player %s",mps);
 
-			 printf("Client %d assigned to game %ld as player %s <%s>\n",client->id,(GameEntry*)client->game - Games,mps, client->nickname);
+			 printf("Client %d assigned to game %d as player %s <%s>\n",client->id,(GameEntry*)client->game - Games,mps, client->nickname);
 
 			 int x;
 			 GameEntry *tg=(GameEntry *)client->game;
@@ -547,13 +547,13 @@ static void KillClient(ClientEntry *client)
      game->Players[w] = NULL;
 
   time_t curtime = time(0);
-  printf("Player <%s> disconnected from game %ld on %s",client->nickname,game-Games,ctime(&curtime));
+  printf("Player <%s> disconnected from game %d on %s",client->nickname,game-Games,ctime(&curtime));
   asprintf(&bmsg, "* Player %s <%s> left.",MakeMPS(client),client->nickname);
   if(tc == client->localplayers)	/* If total players for this game = total local
 					   players for this client, destroy the game.
 					*/
   {
-   printf("Game %ld destroyed.\n",game-Games);
+   printf("Game %d destroyed.\n",game-Games);
    memset(game, 0, sizeof(GameEntry));
    game = 0;
   }
@@ -604,7 +604,7 @@ static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) 
  if(!game) /* Hmm, no game found.  Guess we'll have to create one. */
  {
   game=fegame;
-  printf("Game %ld added\n",game-Games);
+  printf("Game %d added\n",game-Games);
   memset(game, 0, sizeof(GameEntry));
   game->MaxPlayers = 4;
   memcpy(game->id, id, 16);
