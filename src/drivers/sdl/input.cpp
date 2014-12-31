@@ -1642,18 +1642,18 @@ const char * ButtonName (const ButtConfig * bc, int which)
 				inputValue = bc->ButtonNum[which] & 0xF;
 
 				if (inputValue & SDL_HAT_UP)
-					strncat (direction, "Up ", sizeof (direction));
+					strcat(direction, "Up ");
 				if (inputValue & SDL_HAT_DOWN)
-					strncat (direction, "Down ", sizeof (direction));
+					strcat(direction, "Down ");
 				if (inputValue & SDL_HAT_LEFT)
-					strncat (direction, "Left ", sizeof (direction));
+					strcat(direction, "Left ");
 				if (inputValue & SDL_HAT_RIGHT)
-					strncat (direction, "Right ", sizeof (direction));
+					strcat(direction, "Right ");
 
 				if (direction[0])
 					inputDirection = direction;
 				else
-					inputDirection = "Center";
+					inputDirection = "Center ";
 			}
 			else
 			{
