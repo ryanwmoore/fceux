@@ -6,6 +6,7 @@
     <title>FCEUX by ryanwmoore</title>
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/emscripten.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="javascripts/respond.js"></script>
     <!--[if lt IE 9]>
@@ -54,18 +55,54 @@ under the GPL license and is available from <a href="http://www.fceux.com/">http
 <li>Performance</li>
 </ol>
 
-<p>I’ve made several commits to improve code quality, remove warnings, etc. I’ve
-added support for Lua 5.2. There’s still more to be done.</p>
-
-<p>Emscripten support was done by me a while ago as a WIP/hack. I’m now going back
-and doing it more properly/cleanly. This’ll allow you to run FCEUX in your
-browser at almost-native speeds.</p>
-
 <h2>
-<a id="notable-branches" class="anchor" href="#notable-branches" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notable Branches</h2>
+<a id="emscripten-demo" class="anchor" href="#emscripten-demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Emscripten Demo</h2>
 
-<p>The branch clean-lua-5.2 contains my code quality fixes and support for Lua
-5.2.</p>
+    <p>This demo is a work-in-progress and does not work yet.</p>
+
+    <ol>
+      <li>Set your command-line arguments (optional)</li>
+      <li>Select a ROM on your computer</li>
+      <li>Play! A:F, B:D, Select:S, Start:Enter</li>
+    </ol>
+
+    <div>
+      <label for="command-line">Command line arguments used to launch FCEUX:</label>
+      <input type="text" name="command-line" id="command-line" value="--sound 1 --no-config 1 user-uploaded-rom" />
+    </div>
+
+    <div>
+      <label for="rom">
+          Select a ROM (.nes or .zip) from your computer
+      </label>
+      <input type="file" id="rom" name="rom" title="ROM to play">
+    </div>
+
+    <div class="spinner" id='spinner'></div>
+    <div class="emscripten" id="status">Downloading...</div>
+
+    <span id='controls'>
+      <span><input type="checkbox" id="resize">Resize canvas</span>
+      <span><input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer &nbsp;&nbsp;&nbsp;</span>
+      <span><input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked, 
+                                                                                document.getElementById('resize').checked)">
+      </span>
+    </span>
+
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden=1></progress>
+    </div>
+
+
+    <div class="emscripten_border">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    </div>
+    <textarea id="output" rows="8"></textarea>
+
+    <script type="text/javascript" src="javascripts/fceux-setup.js"></script>
+    <script type="text/javascript" src="javascripts/fceux.js"></script>
+
+
       </section>
 
     </div>
