@@ -75,6 +75,8 @@ if os.environ.has_key('PKG_CONFIG_LIBDIR'):
 print "platform: ", env['PLATFORM']
 
 if env['EMSCRIPTEN']:
+  #For access to emscripten executables
+  env['ENV']['PATH'] = os.environ['PATH']
   if env['PLATFORM'] != 'posix':
     print "EMSCRIPTEN with non-POSIX platform is not supported!"
     Exit(1)
@@ -257,6 +259,15 @@ env.Command(fceux_h_dst, fceux_h_src, [Copy(fceux_h_dst, fceux_h_src)])
 env.Command(fceux_dst, fceux_src, [Copy(fceux_dst, fceux_src)])
 env.Command(fceux_net_server_dst, fceux_net_server_src, [Copy(fceux_net_server_dst, fceux_net_server_src)])
 env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
+
+if env['EMSCRIPTEN']:
+  fceux_dst_object_file = fceux_dst + '.o'
+  fceux_dst_javascript = fceux_dst + '.js'
+  fceux_dst_html = fceux_dst + '.html'
+  env.Command(fceux_dst_object_file, fceux_dst, [Copy(fceux_dst_object_file, fceux_dst)])
+  #TODO: Automatically use/extend the compiler flags when generating the .js
+  env.Command(fceux_dst_javascript, fceux_dst_object_file, 'em++ -g2 -O2 -s ASM_JS=1 %s -o %s' % (fceux_dst_object_file, fceux_dst_javascript))
+  env.Command(fceux_dst_html, fceux_dst_object_file, 'em++ -g2 -O2 -s ASM_JS=1 %s -o %s' % (fceux_dst_object_file, fceux_dst_html))
 
 man_src = 'documentation/fceux.6'
 man_net_src = 'documentation/fceux-net-server.6'

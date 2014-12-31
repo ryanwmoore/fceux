@@ -70,8 +70,8 @@ Compile FCEUX
    and lua libraries:
    $ export CPPPATH="path/to/zlib path/to/lua/install/include"
    $ export LIBPATH="path/to/zlib path/to/lua/install/lib"
-2) $ EMCC_FAST_COMPILER=1 emconfigure scons RELEASE=1 GTK=0 LUA=1 SYSTEM_LUA=1 CREATE_AVI=0 OPENGL=0 EMSCRIPTEN=1
-
+3) Compile FCEUX
+   $ EMCC_FAST_COMPILER=1 emconfigure scons RELEASE=1 GTK=0 LUA=1 SYSTEM_LUA=1 CREATE_AVI=0 OPENGL=0 EMSCRIPTEN=1
 
 Relevant links
 ---------------
