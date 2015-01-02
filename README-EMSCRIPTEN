@@ -73,6 +73,11 @@ Compile FCEUX
 3) Compile FCEUX
    $ EMCC_FAST_COMPILER=1 emconfigure scons RELEASE=1 GTK=0 LUA=1 SYSTEM_LUA=1 CREATE_AVI=0 OPENGL=0 EMSCRIPTEN=1
 
+If you have problems recompiling after a previously successful build, try
+starting over from scratch. E.g.:
+   $ git clean -xfd
+   $ [above scons command]
+
 Relevant links
 ---------------
 http://kripken.github.io/emscripten-site/
