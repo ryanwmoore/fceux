@@ -123,7 +123,4 @@ $(function () {
     }
     $(COMMAND_LINE_IDENTIFIER).change(setCommandLine);
     Module.arguments = prepareCommandLineArguments($(COMMAND_LINE_IDENTIFIER).val());
-
-    console.log("ARGUMENTS: ");
-    console.log(Module.arguments);
 });
