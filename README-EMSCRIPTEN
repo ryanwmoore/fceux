@@ -7,6 +7,8 @@ its possible to play FCEUX in your browser. Some browsers (e.g., Firefox)
 highly optimize Emscripten's output. For these browsers, performance can be
 approximately half the speed of a native compilation.
 
+For a demo, visit http://ryanwmoore.github.io/fceux
+
 Steps Overview
 --------------
 
