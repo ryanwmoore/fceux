@@ -87,7 +87,7 @@ if env['EMSCRIPTEN']:
     #TODO: Is the GL emulation necessary?
     env.Append(CCFLAGS = ["-s", "LEGACY_GL_EMULATION=1"])
     env.Append(LINKFLAGS = ["-s", "LEGACY_GL_EMULATION=1"])
-  env.Append(CPPDEFINES = "-DSDL_GetKeyState=SDL_GetKeyboardState")
+  env.Append(CPPDEFINES = ["-DSDL_GetKeyState=SDL_GetKeyboardState", "-DEMSCRIPTEN"])
 
 # compile with clang
 if env['CLANG']:
