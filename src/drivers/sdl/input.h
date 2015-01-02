@@ -56,5 +56,7 @@ void InputCfg(const std::string &);
 
 std::string GetUserText(const char* title);
 const char* ButtonName(const ButtConfig* bc, int which);
+
+int ShowCursor(int toggle);
 #endif
 

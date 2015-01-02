@@ -214,11 +214,11 @@ TogglePause ()
 	{
 		SDL_WM_GrabInput (SDL_GRAB_ON);
 		if(no_cursor)
-			SDL_ShowCursor (0);
+			ShowCursor (0);
 	}
 	else {
 		SDL_WM_GrabInput (SDL_GRAB_OFF);
-		SDL_ShowCursor (1);
+		ShowCursor (1);
 	}
 #endif
 	return;
@@ -2396,3 +2396,26 @@ const int DefaultFamilyKeyBoard[FAMILYKEYBOARD_NUM_BUTTONS] =
 	SDLK_RSHIFT, SDLK_LALT, SDLK_SPACE, SDLK_DELETE, SDLK_END, SDLK_PAGEDOWN,
 	SDLK_UP, SDLK_LEFT, SDLK_RIGHT, SDLK_DOWN
 };
+
+int ShowCursor(int toggle)
+{
+#ifndef EMSCRIPTEN
+    return ShowCursor(toggle);
+#else
+    /* Workaround for a runtime bug that can occur in some browsers. Possibly
+     * related to bugs in EMSCRIPTEN. Seen in Firefox 34. The workaround is to
+     * just ignore cursor showing/hiding.
+     *
+     * TypeError: Module.canvas.exitPointerLock is not a function fceux.js:7746
+     * "exception thrown: TypeError: Module.canvas.exitPointerLock is not a function,_SDL_ShowCursor@http://localhost:8000/javascripts/fceux.js:7746:3
+     * __Z9InitVideoP6FCEUGI@http://localhost:8000/javascripts/fceux.js:53721:2
+     * __ZL16DriverInitializeP6FCEUGI@http://localhost:8000/javascripts/fceux.js:158549:7
+     * __Z8LoadGamePKc@http://localhost:8000/javascripts/fceux.js:84578:8
+     * _main@http://localhost:8000/javascripts/fceux.js:30414:25
+     * callMain@http://localhost:8000/javascripts/fceux.js:232001:13
+     * doRun@http://localhost:8000/javascripts/fceux.js:232036:4
+     * run/<@http://localhost:8000/javascripts/fceux.js:232046:4
+     */
+    return 1;
+#endif
+}
