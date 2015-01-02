@@ -243,8 +243,10 @@ InitVideo(FCEUGI *gi)
 		flags |= SDL_NOFRAME;
 	}
 
+#ifndef EMSCRIPTEN
 	// gives the SDL exclusive palette control... ensures the requested colors
 	flags |= SDL_HWPALETTE;
+#endif
 
 	// enable double buffering if requested and we have hardware support
 #ifdef OPENGL
