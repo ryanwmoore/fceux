@@ -80,12 +80,13 @@ window.onerror = function(event) {
 
 
 
+var LAUNCH_CONTROLS_CLASS = ".launch-controls";
 var ROM_UPLOAD_IDENTIFIER = "#rom"
 var RUNTIME_ROM_NAME = "user-uploaded-rom";
 var COMMAND_LINE_IDENTIFIER = "#command-line";
 
-function hideRomUploader() {
-    $(ROM_UPLOAD_IDENTIFIER).hide();
+function hideRomSetupControls() {
+    $(LAUNCH_CONTROLS_CLASS).hide();
 }
 
 function waitForUserUpload() {
@@ -97,6 +98,8 @@ function addUserData(arrayBuffer, file_name) {
 
     Module.setStatus("Running " + file_name)
     Module['removeRunDependency'](RUNTIME_ROM_NAME);
+
+    hideRomSetupControls();
 }
 
 $(function () {

@@ -67,16 +67,18 @@ under the GPL license and is available from <a href="http://www.fceux.com/">http
       <li>Play! A:F, B:D, Select:S, Start:Enter</li>
     </ol>
 
-    <div>
-      <label for="command-line">Command line arguments used to launch FCEUX:</label>
-      <input type="text" name="command-line" id="command-line" value="--no-config 1 user-uploaded-rom" />
-    </div>
+    <div class="launch-controls">
+      <div>
+        <label for="command-line">Command line arguments used to launch FCEUX:</label>
+        <input type="text" name="command-line" id="command-line" value="--no-config 1 user-uploaded-rom" />
+      </div>
 
-    <div>
-      <label for="rom">
-          Select a ROM (.nes or .zip) from your computer
-      </label>
-      <input type="file" id="rom" name="rom" title="ROM to play">
+      <div>
+        <label for="rom">
+            Select a ROM (.nes or .zip) from your computer
+        </label>
+        <input type="file" id="rom" name="rom" title="ROM to play">
+      </div>
     </div>
 
     <div class="spinner" id='spinner'></div>
