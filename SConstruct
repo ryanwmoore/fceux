@@ -89,6 +89,9 @@ if env['EMSCRIPTEN']:
     env.Append(LINKFLAGS = ["-s", "LEGACY_GL_EMULATION=1"])
   env.Append(CPPDEFINES = ["-DSDL_GetKeyState=SDL_GetKeyboardState", "-DEMSCRIPTEN"])
 
+  env.Append(CCFLAGS = ['-s', 'DISABLE_EXCEPTION_CATCHING=2', '-s', 'ASM_JS=1'])
+  env.Append(LINKFLAGS = ['-s', 'DISABLE_EXCEPTION_CATCHING=2', '-s', 'ASM_JS=1'])
+
 # compile with clang
 if env['CLANG']:
   env.Replace(CC='clang')
@@ -212,6 +215,8 @@ if env['FRAMESKIP']:
 
 if env['DEBUG']:
   env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g', '-O0'])
+else:
+  env.Append(CCFLAGS = ['-O3'])
 
 if env['PLATFORM'] == 'posix' and env['RELEASE']:
     #If doing a release build, be more strict about warnings. Code should
@@ -223,8 +228,6 @@ if env['PLATFORM'] == 'posix' and env['RELEASE']:
     #statements without making locally defined but unused typedefs.
     env.Append(CXXFLAGS = ['-std=c++0x'])
     env.Append(CPPDEFINES = ['-DHAS_STATIC_ASSERT'])
-else:
-  env.Append(CCFLAGS = ['-O2'])
 
 if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI']:
   env.Append(CPPDEFINES=["CREATE_AVI"])
@@ -266,8 +269,9 @@ if env['EMSCRIPTEN']:
   fceux_dst_html = fceux_dst + '.html'
   env.Command(fceux_dst_object_file, fceux_dst, [Copy(fceux_dst_object_file, fceux_dst)])
   #TODO: Automatically use/extend the compiler flags when generating the .js
-  env.Command(fceux_dst_javascript, fceux_dst_object_file, 'em++ -g2 -O2 -s ASM_JS=1 %s -o %s' % (fceux_dst_object_file, fceux_dst_javascript))
-  env.Command(fceux_dst_html, fceux_dst_object_file, 'em++ -g2 -O2 -s ASM_JS=1 %s -o %s' % (fceux_dst_object_file, fceux_dst_html))
+  base_flags = '-g3 -O3 -s DISABLE_EXCEPTION_CATCHING=2 -s ASM_JS=1'
+  env.Command(fceux_dst_javascript, fceux_dst_object_file, 'em++ %s %s -o %s' % (base_flags, fceux_dst_object_file, fceux_dst_javascript))
+  env.Command(fceux_dst_html, fceux_dst_object_file, 'em++ %s %s -o %s' % (base_flags, fceux_dst_object_file, fceux_dst_html))
 
 man_src = 'documentation/fceux.6'
 man_net_src = 'documentation/fceux-net-server.6'
