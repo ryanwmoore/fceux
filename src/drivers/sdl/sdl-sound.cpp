@@ -116,8 +116,9 @@ InitSound()
 	s_BufferSize = soundbufsize * soundrate / 1000;
 
 	// For safety, set a bare minimum:
-	if (s_BufferSize < spec.samples * 2)
-	s_BufferSize = spec.samples * 2;
+    if (s_BufferSize < spec.samples * 2) {
+        s_BufferSize = spec.samples * 2;
+    }
 
 	s_Buffer = (int *)FCEU_dmalloc(sizeof(int) * s_BufferSize);
 	if (!s_Buffer)
@@ -130,6 +131,7 @@ InitSound()
 		KillSound();
 		return 0;
     }
+
 	SDL_PauseAudio(0);
 
 	FCEUI_SetSoundVolume(soundvolume);
@@ -162,6 +164,19 @@ GetWriteSound(void)
 	return(s_BufferSize - s_BufferIn);
 }
 
+void WriteSoundIntoBuffer(int32 **buf, int *Count)
+{
+    s_Buffer[s_BufferWrite] = **buf;
+    (*Count)--;
+    s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
+
+    SDL_LockAudio();
+    s_BufferIn++;
+    SDL_UnlockAudio();
+
+    (*buf)++;
+}
+
 /**
  * Send a sound clip to the audio subsystem.
  */
@@ -173,20 +188,19 @@ WriteSound(int32 *buf,
 	if (EmulationPaused == 0)
 		while(Count)
 		{
+#ifndef EMSCRIPTEN
 			while(s_BufferIn == s_BufferSize) 
 			{
 				SDL_Delay(1);
 			}
+#else //EMSCRIPTEN
+            if (s_BufferIn == s_BufferSize) {
+                //No room left. Just exit.
+                return;
+            }
+#endif
 
-			s_Buffer[s_BufferWrite] = *buf;
-			Count--;
-			s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
-            
-			SDL_LockAudio();
-			s_BufferIn++;
-			SDL_UnlockAudio();
-            
-			buf++;
+            WriteSoundIntoBuffer(&buf, &Count);
 		}
 }
 
