@@ -425,7 +425,15 @@ FCEUD_Update(uint8 *XBuf,
 		//if(uflow) puts("Underflow");
 		tmpcan = GetWriteSound();
 		// don't underflow when scaling fps
+#ifdef EMSCRIPTEN
+        /* HACK: Force this code path to be executed for Emscripten builds. I'm
+         * not really sure why this is required. However, if we do not force
+         * this code path then the display never gets updated.
+         */
+        if (1) {
+#else
 		if(g_fpsScale>1.0 || ((tmpcan < Count*0.90) && !uflow)) {
+#endif
 			if(XBuf && (inited&4) && !(NoWaiting & 2))
 				BlitScreen(XBuf);
 			Buffer+=can;
@@ -463,10 +471,16 @@ FCEUD_Update(uint8 *XBuf,
 
 	} else {
 		if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		while (SpeedThrottle())
-		{
-			FCEUD_UpdateInput();
-		}
+        {
+#ifdef EMSCRIPTEN
+            FCEUD_UpdateInput();
+#else
+            while (SpeedThrottle())
+            {
+                FCEUD_UpdateInput();
+            }
+#endif
+        }
 		if(XBuf && (inited&4)) {
 			BlitScreen(XBuf);
 		}
