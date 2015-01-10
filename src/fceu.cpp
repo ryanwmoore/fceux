@@ -862,28 +862,37 @@ void FCEU_ResetVidSys(void) {
 
 FCEUS FSettings;
 
-void FCEU_printf(char *format, ...) {
-	char temp[2048];
-
-	va_list ap;
-
-	va_start(ap, format);
-	vsnprintf(temp, sizeof(temp), format, ap);
-	FCEUD_Message(temp);
-
-	va_end(ap);
+static void FCEU_vprintf(const char *format, va_list args) {
+    char temp[2048];
+    vsnprintf(temp, sizeof(temp), format, args);
+    FCEUD_Message(temp);
 }
 
-void FCEU_PrintError(char *format, ...) {
-	char temp[2048];
+void FCEU_printf(const char *format, ...) {
+    va_list ap;
 
-	va_list ap;
+    va_start(ap, format);
+    FCEU_vprintf(format, ap);
+    va_end(ap);
+}
 
-	va_start(ap, format);
-	vsnprintf(temp, sizeof(temp), format, ap);
-	FCEUD_PrintError(temp);
+void FCEU_PrintError(const char *format, ...) {
+    va_list ap;
 
-	va_end(ap);
+    va_start(ap, format);
+    FCEU_vprintf(format, ap);
+    va_end(ap);
+}
+
+
+NORETURN void FCEU_PrintFatalError(const char *format, ...) {
+    va_list ap;
+
+    va_start(ap, format);
+    FCEU_vprintf(format, ap);
+    va_end(ap);
+
+    exit(EXIT_FAILURE);
 }
 
 void FCEUI_SetRenderedLines(int ntscf, int ntscl, int palf, int pall) {

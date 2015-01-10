@@ -89,7 +89,7 @@ static DECLFR(UNLSB2000Read) {
 //	case 0x4205:	// unk
 //		return 0xff;
 	default:
-		FCEU_printf("unk read: %04x\n",A);
+        FCEU_PrintFatalError("unk read: %04x caused end of function to be reached (%s:%d)\n",A, __FILE__, __LINE__);
 //		break;
 		return 0xff; // needed to prevent C4715 warning?
 	}

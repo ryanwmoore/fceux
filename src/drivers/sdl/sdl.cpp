@@ -1057,7 +1057,6 @@ void FCEUD_PrintError(const char *errormsg)
 	fprintf(stderr, "%s\n", errormsg);
 }
 
-
 // dummy functions
 
 #define DUMMY(__f) \

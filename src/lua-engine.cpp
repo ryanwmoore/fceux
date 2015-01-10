@@ -3616,6 +3616,7 @@ static int gui_transparency(lua_State *L) {
 	return 0;
 }
 
+#if 0
 
 static const uint32 Small_Font_Data[] =
 {
@@ -3730,7 +3731,6 @@ static int strlinelen(const char* string)
 }
 */
 
-#if 0
 static void PutTextInternal (const char *str, int len, short x, short y, int color, int backcolor)
 {
 	int Opac = (color >> 24) & 0xFF;

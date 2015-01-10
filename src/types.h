@@ -142,6 +142,19 @@ typedef uint8 (*readfunc)(uint32 A);
     #endif
 #endif
 
+#if _MSC_VER >= 1310 
+/* MS Visual Studio 2003/.NET Framework 1.1 or newer */
+#define NORETURN _declspec( noreturn)
+#elif __GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ >= 5))
+/* GCC 2.5 or newer */
+#define NORETURN __attribute__ ((noreturn))
+#elif __STDC_VERSION__ >= 201ymmL
+// the value specified in C1x 6.10.8)
+#define NORETURN _Noreturn
+#else
+#error Cannot determine how to mark function as noreturn
+#endif
+
 #include "utils/endian.h"
 
 #endif
